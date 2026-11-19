@@ -83,17 +83,27 @@
 
                 <StackPanel Grid.Row="4" VerticalAlignment="Bottom">
                     <Button Height="52" Margin="0,0,0,9" Command="{Binding StartCommand}"
+                            Visibility="{Binding StartVisibility}"
                             Background="{StaticResource Accent}" BorderBrush="{StaticResource Accent}">
                         <TextBlock Text="▶   Aufnahme starten" FontSize="15" FontWeight="SemiBold"/>
                     </Button>
-                    <Button Height="48" Margin="0,0,0,9" Command="{Binding PauseCommand}">
+                    <Button Height="48" Margin="0,0,0,9" Command="{Binding PauseCommand}"
+                            Visibility="{Binding PauseVisibility}">
                         <TextBlock Text="{Binding PauseButtonText}" FontSize="14" FontWeight="SemiBold"/>
                     </Button>
-                    <Button Height="48" Margin="0,0,0,9" Command="{Binding FinishCommand}">
+                    <Button Height="48" Margin="0,0,0,9" Command="{Binding FinishCommand}"
+                            Visibility="{Binding FinishVisibility}"
+                            Style="{StaticResource SubtleDangerButton}">
                         <TextBlock Text="■   Aufnahme beenden" FontSize="14" FontWeight="SemiBold"/>
                     </Button>
-                    <Button Height="48" Command="{Binding SaveCommand}">
+                    <Button Height="48" Margin="0,0,0,9" Command="{Binding SaveCommand}"
+                            Visibility="{Binding SaveVisibility}">
                         <TextBlock Text="⤓   Aufnahme speichern" FontSize="14" FontWeight="SemiBold"/>
+                    </Button>
+                    <Button Height="48" Command="{Binding DiscardCommand}"
+                            Visibility="{Binding DiscardVisibility}"
+                            Style="{StaticResource SubtleDangerButton}">
+                        <TextBlock Text="Aufnahme verwerfen" FontSize="14" FontWeight="SemiBold"/>
                     </Button>
                 </StackPanel>
             </Grid>

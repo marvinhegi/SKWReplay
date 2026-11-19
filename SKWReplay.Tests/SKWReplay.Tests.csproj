@@ -14,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SKWReplay.Core\SKWReplay.Core.csproj" />
+    <ProjectReference Include="..\SKWReplay.Camera\SKWReplay.Camera.csproj" />
     <ProjectReference Include="..\SKWReplay.Recording\SKWReplay.Recording.csproj" />
   </ItemGroup>
 </Project>

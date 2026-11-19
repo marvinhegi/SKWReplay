@@ -8,7 +8,10 @@ SKWReplay ist eine Windows-Desktop-App für Kameraaufnahmen mit verzögerter Liv
 
 - Kamera-Vorschau und Kameraauswahl
 - Verzögerung der Vorschau von 0 bis 60 Sekunden
+- Verzögerung während Aufnahme und Pause verstellen; beim Erhöhen wird der Countdown für noch fehlenden Puffer angezeigt
 - Aufnahme starten, pausieren, fortsetzen und beenden
+- Beendete Aufnahme speichern oder verwerfen; danach kann eine neue Aufnahme gestartet werden
+- Kameras über DirectShow mit den von Windows gelieferten Gerätenamen erkennen
 - Digitale Vergrösserung über das Mausrad
 - MP4-Export mit H.264 über FFmpeg
 - Pausen werden als separate Videosegmente aufgezeichnet und beim Export zusammengeführt
@@ -106,10 +109,10 @@ Wenn sie fehlt, wurde FFmpeg nicht in das App-Projektverzeichnis gelegt. Ergänz
 ## Bedienung
 
 1. Wähle eine Kamera im Dropdown aus. **Kameras aktualisieren** startet eine erneute Erkennung.
-2. Stelle die Verzögerung mit den Pfeiltasten ein. Der Bereich ist 0–60 Sekunden.
+2. Stelle die Verzögerung mit den Pfeiltasten ein. Der Bereich ist 0–60 Sekunden. Du kannst sie auch während der Aufnahme verändern; wenn für eine längere Verzögerung noch Videopuffer fehlt, erscheint erneut ein Countdown.
 3. Klicke **Aufnahme starten**. Die Aufnahme beginnt, während der Countdown für die verzögerte Vorschau läuft.
 4. Mit **Aufnahme pausieren** und **Aufnahme fortsetzen** kannst du Abschnitte unterbrechen. Mit **Aufnahme beenden** wird die Aufnahme abgeschlossen.
-5. Klicke anschliessend auf **Aufnahme speichern**, wähle den Speicherort und den Dateinamen.
+5. Klicke **Aufnahme speichern**, um die MP4-Datei zu exportieren, oder **Aufnahme verwerfen**, wenn du sie nicht behalten möchtest. Nach erfolgreichem Speichern oder Verwerfen ist eine neue Aufnahme möglich.
 6. Zum Zoomen bewege das Mausrad über der Vorschau.
 
 Die Aufnahme wird vorübergehend unter `%TEMP%\SKWReplay` abgelegt. Nach erfolgreichem Export räumt die App ihre Segmente auf. Bei einem Absturz kann die temporäre Aufnahme unvollständig oder nicht wiederherstellbar sein.
