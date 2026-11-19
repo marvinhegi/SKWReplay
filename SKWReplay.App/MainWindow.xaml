@@ -1,0 +1,102 @@
+<Window x:Class="SKWReplay.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SKWReplay" Width="1240" Height="760" MinWidth="920" MinHeight="620"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource WindowBackground}"
+        Foreground="{StaticResource TextPrimary}">
+    <Grid Margin="18">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="330"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Margin="0,0,16,0" Background="#0C0F13" BorderBrush="#303743"
+                BorderThickness="1" CornerRadius="16" ClipToBounds="True" MouseWheel="Preview_MouseWheel">
+            <Grid>
+                <Image x:Name="PreviewImage" Source="{Binding Preview}" Stretch="Uniform"/>
+                <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="18"
+                        Background="#B7181D26" CornerRadius="8" Padding="10,6"
+                        Visibility="{Binding RecordingBadgeVisibility}">
+                    <TextBlock Text="{Binding RecordingBadge}" FontWeight="SemiBold" Foreground="#FF5A66"/>
+                </Border>
+                <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                        Background="#E3181D26" CornerRadius="16" Padding="34,20"
+                        Visibility="{Binding CountdownVisibility}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Countdown}" FontSize="64" FontWeight="Light"
+                                   HorizontalAlignment="Center" Foreground="White"/>
+                        <TextBlock Text="Verzögerte Vorschau" FontSize="16" Foreground="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+                <TextBlock Text="{Binding StatusMessage}" HorizontalAlignment="Center"
+                           VerticalAlignment="Bottom" Margin="0,0,0,22"
+                           Foreground="{StaticResource TextMuted}" FontSize="13"/>
+            </Grid>
+        </Border>
+
+        <Border Grid.Column="1" Background="#E2232932" BorderBrush="#3A424E" BorderThickness="1"
+                CornerRadius="16" Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="#292F38" CornerRadius="12" Padding="16" Margin="0,0,0,14">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="◷" FontSize="30" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                        <TextBlock Grid.Column="1" Text="{Binding DelayText}" FontSize="34" FontWeight="Light"
+                                   VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                            <Button Content="▲" Width="42" Height="34" Command="{Binding DelayUpCommand}" Margin="0,0,0,6"/>
+                            <Button Content="▼" Width="42" Height="34" Command="{Binding DelayDownCommand}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <StackPanel Grid.Row="1" Margin="0,0,0,14">
+                    <TextBlock Text="Kamera auswählen" Foreground="{StaticResource TextMuted}" Margin="0,0,0,7"/>
+                    <ComboBox ItemsSource="{Binding Cameras}" SelectedItem="{Binding SelectedCamera}"
+                              DisplayMemberPath="Name" Height="42"/>
+                    <Button Content="Kameras aktualisieren" Command="{Binding RefreshCamerasCommand}"
+                            Margin="0,8,0,0"/>
+                </StackPanel>
+
+                <Border Grid.Row="2" Background="#20262F" CornerRadius="10" Padding="13" Margin="0,0,0,14">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="●" Foreground="{StaticResource Accent}" FontSize="12" Margin="0,0,9,0"/>
+                        <TextBlock Text="Nur Kamera" FontWeight="SemiBold"/>
+                        <TextBlock Text="MP4 · H.264 · 30 fps" Foreground="{StaticResource TextMuted}"
+                                   Margin="18,0,0,0" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Grid.Row="4" VerticalAlignment="Bottom">
+                    <Button Height="52" Margin="0,0,0,9" Command="{Binding StartCommand}"
+                            Background="{StaticResource Accent}" BorderBrush="{StaticResource Accent}">
+                        <TextBlock Text="▶   Aufnahme starten" FontSize="15" FontWeight="SemiBold"/>
+                    </Button>
+                    <Button Height="48" Margin="0,0,0,9" Command="{Binding PauseCommand}">
+                        <TextBlock Text="{Binding PauseButtonText}" FontSize="14" FontWeight="SemiBold"/>
+                    </Button>
+                    <Button Height="48" Margin="0,0,0,9" Command="{Binding FinishCommand}">
+                        <TextBlock Text="■   Aufnahme beenden" FontSize="14" FontWeight="SemiBold"/>
+                    </Button>
+                    <Button Height="48" Command="{Binding SaveCommand}">
+                        <TextBlock Text="⤓   Aufnahme speichern" FontSize="14" FontWeight="SemiBold"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

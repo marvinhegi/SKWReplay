@@ -1,0 +1,28 @@
+# .NET Build-Dateien
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# IDE
+.idea/
+
+# Umgebungsdateien
+.env
+.env.*
+
+# Betriebssystem
+.DS_Store
+Thumbs.db
+
+# Build und Publish
+**/bin/
+**/obj/
+publish-win-x64/
+**/publish-win-x64/
+
+# FFmpeg
+**/ffmpeg/

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="SKWReplay.App/SKWReplay.App.csproj" />
+  <Project Path="SKWReplay.Camera/SKWReplay.Camera.csproj" />
+  <Project Path="SKWReplay.Core/SKWReplay.Core.csproj" />
+  <Project Path="SKWReplay.Recording/SKWReplay.Recording.csproj" />
+  <Project Path="SKWReplay.Tests/SKWReplay.Tests.csproj" />
+</Solution>
