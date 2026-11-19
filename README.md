@@ -13,6 +13,8 @@ SKWReplay ist eine Windows-Desktop-App für Kameraaufnahmen mit verzögerter Liv
 - Beendete Aufnahme speichern oder verwerfen; danach kann eine neue Aufnahme gestartet werden
 - Kameras über DirectShow mit den von Windows gelieferten Gerätenamen erkennen
 - Digitale Vergrösserung über das Mausrad
+- Einstellungsbereich ein- und ausklappen
+- Vollbildmodus: Hauptfenster auf dem primären Monitor, reine Vorschau auf weiteren Monitoren
 - MP4-Export mit H.264 über FFmpeg
 - Pausen werden als separate Videosegmente aufgezeichnet und beim Export zusammengeführt
 - Self-contained Windows-x64-Publish: Die .NET-Runtime muss auf dem Zielcomputer nicht separat installiert werden

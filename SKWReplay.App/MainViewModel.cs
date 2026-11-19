@@ -10,6 +10,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using SKWReplay.Camera;
+using WpfApplication = System.Windows.Application;
+using WpfMessageBox = System.Windows.MessageBox;
+using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
 
 namespace SKWReplay.App;
 
@@ -33,6 +36,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private Visibility _recordingBadgeVisibility = Visibility.Collapsed;
     private Visibility _countdownVisibility = Visibility.Collapsed;
     private double _zoom = 1.0;
+    private bool _isSettingsExpanded = true;
+    private bool _isFullscreen;
     private bool _disposed;
 
     public ObservableCollection<CameraDevice> Cameras { get; } = new();
@@ -59,6 +64,38 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public Visibility FinishVisibility => PauseVisibility;
     public Visibility SaveVisibility => _state == RecordingState.Finished ? Visibility.Visible : Visibility.Collapsed;
     public Visibility DiscardVisibility => SaveVisibility;
+    public Visibility SettingsPanelVisibility => _isSettingsExpanded ? Visibility.Visible : Visibility.Collapsed;
+    public Visibility SettingsToggleVisibility => _isSettingsExpanded ? Visibility.Collapsed : Visibility.Visible;
+    public Thickness PreviewMargin => _isSettingsExpanded ? new Thickness(0, 0, 16, 0) : new Thickness(0);
+    public string FullscreenButtonText => _isFullscreen ? "Vollbild verlassen" : "Vollbild";
+    public Geometry FullscreenIconGeometry => Geometry.Parse(_isFullscreen
+        ? "M9,3 V9 H3 M15,3 V9 H21 M21,15 H15 V21 M9,21 V15 H3"
+        : "M3,9 V3 H9 M15,3 H21 V9 M21,15 V21 H15 M9,21 H3 V15");
+    public bool IsSettingsExpanded
+    {
+        get => _isSettingsExpanded;
+        private set
+        {
+            if (SetProperty(ref _isSettingsExpanded, value))
+            {
+                Raise(nameof(SettingsPanelVisibility));
+                Raise(nameof(SettingsToggleVisibility));
+                Raise(nameof(PreviewMargin));
+            }
+        }
+    }
+    public bool IsFullscreen
+    {
+        get => _isFullscreen;
+        private set
+        {
+            if (SetProperty(ref _isFullscreen, value))
+            {
+                Raise(nameof(FullscreenButtonText));
+                Raise(nameof(FullscreenIconGeometry));
+            }
+        }
+    }
     public string DelayText => $"{_delay} s";
     public string Countdown => _countdown.ToString();
 
@@ -70,6 +107,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public RelayCommand SaveCommand { get; }
     public RelayCommand FinishCommand { get; }
     public RelayCommand DiscardCommand { get; }
+    public RelayCommand ToggleSettingsCommand { get; }
+    public RelayCommand ToggleFullscreenCommand { get; }
 
     public MainViewModel()
     {
@@ -81,9 +120,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SaveCommand = new RelayCommand(_ => _ = SaveAsync(), _ => _state is RecordingState.Finished);
         FinishCommand = new RelayCommand(_ => FinishRecording(), _ => _state is RecordingState.Recording or RecordingState.Paused);
         DiscardCommand = new RelayCommand(_ => DiscardRecording(), _ => _state is RecordingState.Finished);
+        ToggleSettingsCommand = new RelayCommand(_ => IsSettingsExpanded = !IsSettingsExpanded);
+        ToggleFullscreenCommand = new RelayCommand(_ => IsFullscreen = !IsFullscreen);
 
         _camera.FrameReceived += OnCameraFrame;
-        _camera.ErrorOccurred += message => Application.Current.Dispatcher.Invoke(() =>
+        _camera.ErrorOccurred += message => WpfApplication.Current.Dispatcher.Invoke(() =>
         {
             StatusMessage = message;
             _state = RecordingState.Error;
@@ -138,6 +179,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _countdownEnd = _bufferStartedAt.AddSeconds(_delay);
             _countdown = Math.Max(0, (int)Math.Ceiling((_countdownEnd - DateTimeOffset.UtcNow).TotalSeconds));
             CountdownVisibility = _countdown > 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (_countdown > 0)
+                Preview = null;
             StatusMessage = _countdown > 0 ? "Verzögerungspuffer wird aufgebaut" : "Verzögerte Vorschau aktiv";
             Raise(nameof(Countdown));
         }
@@ -157,6 +200,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _countdown = _delay;
         Raise(nameof(Countdown));
         CountdownVisibility = _delay > 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (_delay > 0)
+            Preview = null;
         _state = RecordingState.Recording;
         StatusMessage = _delay > 0 ? "Verzögerungspuffer wird aufgebaut" : "Aufnahme läuft";
         RecordingBadge = "● REC";
@@ -184,6 +229,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _countdown = _delay;
             Raise(nameof(Countdown));
             CountdownVisibility = _delay > 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (_delay > 0)
+                Preview = null;
             _state = RecordingState.Recording;
             StatusMessage = "Aufnahme läuft";
             RecordingBadge = "● REC";
@@ -197,7 +244,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void OnCameraFrame(CameraFrame frame)
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        WpfApplication.Current.Dispatcher.Invoke(() =>
         {
             if (_state == RecordingState.Recording)
             {
@@ -312,7 +359,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         if (!RecordingManager.HasFreeDiskSpace(dialog.FileName, 1024UL * 1024 * 1024))
         {
-            MessageBox.Show("Nicht genügend Speicherplatz auf dem Ziellaufwerk.", "Speicherplatz", MessageBoxButton.OK, MessageBoxImage.Warning);
+            WpfMessageBox.Show("Nicht genügend Speicherplatz auf dem Ziellaufwerk.", "Speicherplatz", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -328,7 +375,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _duration.Reset();
             _state = RecordingState.Ready;
             StatusMessage = "Aufnahme gespeichert";
-            MessageBox.Show($"Das Video wurde gespeichert:\n{dialog.FileName}", "Erfolg",
+            WpfMessageBox.Show($"Das Video wurde gespeichert:\n{dialog.FileName}", "Erfolg",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
         else
