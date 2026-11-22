@@ -4,6 +4,7 @@ using SKWReplay.Core;
 using SKWReplay.Recording;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
@@ -18,6 +19,11 @@ namespace SKWReplay.App;
 
 public sealed class MainViewModel : ObservableObject, IDisposable
 {
+    private static readonly string DelaySettingsPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "SKWReplay",
+        "delay-seconds.txt");
+
     private readonly SKWReplay.Camera.CameraCapture _camera = new();
     private readonly RecordingManager _recording = new();
     private readonly DelayRingBuffer _ring = new();
@@ -132,6 +138,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         });
         _timer.Tick += (_, _) => UpdateTimer();
         RefreshCameras();
+        LoadDelaySetting();
         _timer.Start();
     }
 
@@ -183,6 +190,53 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                 Preview = null;
             StatusMessage = _countdown > 0 ? "Verzögerungspuffer wird aufgebaut" : "Verzögerte Vorschau aktiv";
             Raise(nameof(Countdown));
+        }
+        SaveDelaySetting();
+    }
+
+    private void LoadDelaySetting()
+    {
+        if (!File.Exists(DelaySettingsPath))
+            return;
+
+        try
+        {
+            string value = File.ReadAllText(DelaySettingsPath);
+            if (!int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int delay))
+            {
+                StatusMessage = "Die gespeicherte Verzögerungseinstellung ist ungültig.";
+                return;
+            }
+
+            _delay = Math.Clamp(delay, 0, 60);
+        }
+        catch (IOException ex)
+        {
+            StatusMessage = $"Verzögerungseinstellung konnte nicht geladen werden: {ex.Message}";
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            StatusMessage = $"Verzögerungseinstellung konnte nicht geladen werden: {ex.Message}";
+        }
+    }
+
+    private void SaveDelaySetting()
+    {
+        try
+        {
+            string directory = Path.GetDirectoryName(DelaySettingsPath)!;
+            Directory.CreateDirectory(directory);
+            string temporaryPath = $"{DelaySettingsPath}.tmp";
+            File.WriteAllText(temporaryPath, _delay.ToString(CultureInfo.InvariantCulture));
+            File.Move(temporaryPath, DelaySettingsPath, true);
+        }
+        catch (IOException ex)
+        {
+            StatusMessage = $"Verzögerungseinstellung konnte nicht gespeichert werden: {ex.Message}";
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            StatusMessage = $"Verzögerungseinstellung konnte nicht gespeichert werden: {ex.Message}";
         }
     }
 
@@ -270,7 +324,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
                     var delayed = _ring.GetDelayedFrame(_delay);
                     if (delayed is null)
                     {
-                        Preview = null;
+                        Preview = CreatePreview(frame.Image);
                     }
                     else
                     {

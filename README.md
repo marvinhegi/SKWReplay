@@ -8,6 +8,7 @@ SKWReplay ist eine Windows-Desktop-App für Kameraaufnahmen mit verzögerter Liv
 
 - Kamera-Vorschau und Kameraauswahl
 - Verzögerung der Vorschau von 0 bis 60 Sekunden
+- Die zuletzt eingestellte Verzögerung bleibt nach einem Neustart erhalten
 - Verzögerung während Aufnahme und Pause verstellen; beim Erhöhen wird der Countdown für noch fehlenden Puffer angezeigt
 - Aufnahme starten, pausieren, fortsetzen und beenden
 - Beendete Aufnahme speichern oder verwerfen; danach kann eine neue Aufnahme gestartet werden
@@ -116,6 +117,8 @@ Wenn sie fehlt, wurde FFmpeg nicht in das App-Projektverzeichnis gelegt. Ergänz
 4. Mit **Aufnahme pausieren** und **Aufnahme fortsetzen** kannst du Abschnitte unterbrechen. Mit **Aufnahme beenden** wird die Aufnahme abgeschlossen.
 5. Klicke **Aufnahme speichern**, um die MP4-Datei zu exportieren, oder **Aufnahme verwerfen**, wenn du sie nicht behalten möchtest. Nach erfolgreichem Speichern oder Verwerfen ist eine neue Aufnahme möglich.
 6. Zum Zoomen bewege das Mausrad über der Vorschau.
+
+Die Verzögerungseinstellung wird lokal unter `%LOCALAPPDATA%\SKWReplay\delay-seconds.txt` gespeichert. Dafür wird keine Datenbank oder zusätzliche Bibliothek benötigt.
 
 Die Aufnahme wird vorübergehend unter `%TEMP%\SKWReplay` abgelegt. Nach erfolgreichem Export räumt die App ihre Segmente auf. Bei einem Absturz kann die temporäre Aufnahme unvollständig oder nicht wiederherstellbar sein.
 
