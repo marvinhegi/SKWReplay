@@ -375,8 +375,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _duration.Reset();
             _state = RecordingState.Ready;
             StatusMessage = "Aufnahme gespeichert";
-            WpfMessageBox.Show($"Das Video wurde gespeichert:\n{dialog.FileName}", "Erfolg",
-                MessageBoxButton.OK, MessageBoxImage.Information);
+            var successWindow = new SaveSuccessWindow(dialog.FileName)
+            {
+                Owner = WpfApplication.Current.MainWindow
+            };
+            successWindow.ShowDialog();
         }
         else
         {
