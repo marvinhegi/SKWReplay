@@ -6,12 +6,14 @@ namespace SKWReplay.Recording;
 
 public sealed class RecordingManager : IDisposable
 {
+    private const int EncoderFrameRate = 30;
     private readonly object _sync = new();
     private readonly List<string> _segments = new();
     private Process? _encoder;
     private BinaryWriter? _input;
     private int _width;
     private int _height;
+    private long _writtenFrameCount;
     private bool _recording;
     private string _workingDirectory;
 
@@ -43,7 +45,7 @@ public sealed class RecordingManager : IDisposable
                 if (_width % 2 != 0) _width--;
                 string segment = Path.Combine(_workingDirectory, $"segment-{_segments.Count + 1:0000}-{Guid.NewGuid():N}.mp4");
 
-                var arguments = $"-y -hide_banner -loglevel error -f rawvideo -pixel_format bgr24 -video_size {_width}x{_height} -framerate 30 -i pipe:0 -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -movflags +faststart \"{segment}\"";
+                var arguments = $"-y -hide_banner -loglevel error -f rawvideo -pixel_format bgr24 -video_size {_width}x{_height} -framerate {EncoderFrameRate} -i pipe:0 -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -movflags +faststart \"{segment}\"";
                 var psi = new ProcessStartInfo
                 {
                     FileName = ffmpeg,
@@ -94,6 +96,7 @@ public sealed class RecordingManager : IDisposable
                 System.Runtime.InteropServices.Marshal.Copy(resized.Data, bytes, 0, bytes.Length);
                 _input.Write(bytes);
                 _input.Flush();
+                _writtenFrameCount++;
             }
             catch (Exception ex)
             {
@@ -137,7 +140,10 @@ public sealed class RecordingManager : IDisposable
         catch (Exception ex) { LastError = ex.Message; }
     }
 
-    public async Task<bool> SaveAsync(string destination, IProgress<int>? progress = null)
+    public async Task<bool> SaveAsync(
+        string destination,
+        IProgress<int>? progress = null,
+        TimeSpan? capturedDuration = null)
     {
         return await Task.Run(() =>
         {
@@ -158,19 +164,44 @@ public sealed class RecordingManager : IDisposable
                     return false;
                 }
 
-                if (_segments.Count == 1)
+                double timestampScale = 1;
+                if (capturedDuration is TimeSpan duration
+                    && duration.TotalSeconds > 0
+                    && _writtenFrameCount > 0)
+                {
+                    double encodedDuration = _writtenFrameCount / (double)EncoderFrameRate;
+                    timestampScale = duration.TotalSeconds / encodedDuration;
+                }
+
+                bool correctPlaybackSpeed = Math.Abs(timestampScale - 1) > 0.02;
+                if (_segments.Count == 1 && !correctPlaybackSpeed)
                 {
                     File.Copy(_segments[0], destination, true);
                     progress?.Report(100);
                     return true;
                 }
 
-                string list = Path.Combine(_workingDirectory, $"concat-{Guid.NewGuid():N}.txt");
-                File.WriteAllLines(list, _segments.Select(s => $"file '{s.Replace("'", "'\\''")}'"));
+                string? list = null;
+                string timestampScaleArgument = correctPlaybackSpeed
+                    ? $"-itsscale {timestampScale.ToString("0.########", CultureInfo.InvariantCulture)} "
+                    : "";
+                string inputArguments;
+                if (_segments.Count == 1)
+                {
+                    inputArguments = $"{timestampScaleArgument}-i \"{_segments[0]}\"";
+                }
+                else
+                {
+                    list = Path.Combine(_workingDirectory, $"concat-{Guid.NewGuid():N}.txt");
+                    File.WriteAllLines(list, _segments.Select(s => $"file '{s.Replace("'", "'\\''")}'"));
+                    inputArguments = $"-f concat -safe 0 {timestampScaleArgument}-i \"{list}\"";
+                }
+
+                const string outputArguments = "-c copy -movflags +faststart";
                 var psi = new ProcessStartInfo
                 {
                     FileName = ffmpeg,
-                    Arguments = $"-y -hide_banner -loglevel error -f concat -safe 0 -i \"{list}\" -c copy \"{destination}\"",
+                    Arguments = $"-y -hide_banner -loglevel error {inputArguments} {outputArguments} \"{destination}\"",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
@@ -183,7 +214,8 @@ public sealed class RecordingManager : IDisposable
                     LastError = $"FFmpeg konnte das Video nicht zusammenführen. Exit-Code: {process.ExitCode}";
                     return false;
                 }
-                try { File.Delete(list); } catch { }
+                if (list is not null)
+                    try { File.Delete(list); } catch { }
                 return true;
             }
             catch (Exception ex)
@@ -202,6 +234,7 @@ public sealed class RecordingManager : IDisposable
             try { File.Delete(segment); } catch { }
         }
         _segments.Clear();
+        _writtenFrameCount = 0;
     }
 
     public static bool HasFreeDiskSpace(string path, ulong requiredBytes)

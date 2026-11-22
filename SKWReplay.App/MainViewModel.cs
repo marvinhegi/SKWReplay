@@ -441,7 +441,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         StatusMessage = "Aufnahme wird verarbeitet";
         RaiseStateCommands();
         var progress = new Progress<int>(value => StatusMessage = $"Speichern {value}%");
-        bool success = await _recording.SaveAsync(dialog.FileName, progress);
+        bool success = await _recording.SaveAsync(dialog.FileName, progress, _duration.Elapsed);
         if (success)
         {
             _recording.Cleanup();
