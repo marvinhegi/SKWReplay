@@ -505,7 +505,6 @@ Entwickle die Anwendung schrittweise.
 
 # ToDo ab Hier
 
-Das Disign anpassen Icon taskleiste oen in bar und als app
 
 Desktopverknüpfung
 

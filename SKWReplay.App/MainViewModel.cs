@@ -72,7 +72,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public Visibility DiscardVisibility => SaveVisibility;
     public Visibility SettingsPanelVisibility => _isSettingsExpanded ? Visibility.Visible : Visibility.Collapsed;
     public Visibility SettingsToggleVisibility => _isSettingsExpanded ? Visibility.Collapsed : Visibility.Visible;
-    public Thickness PreviewMargin => _isSettingsExpanded ? new Thickness(0, 0, 16, 0) : new Thickness(0);
+    public Thickness ContentMargin => _isFullscreen ? new Thickness(10) : new Thickness(18);
+    public Thickness PreviewMargin => _isSettingsExpanded
+        ? new Thickness(0, 0, _isFullscreen ? 10 : 16, 0)
+        : new Thickness(0);
+    public Thickness SettingsPanelPadding => _isFullscreen ? new Thickness(16) : new Thickness(20);
+    public Thickness BottomActionsMargin => _isFullscreen
+        ? new Thickness(0, 0, 0, 16)
+        : new Thickness(0, 0, 0, 24);
     public string FullscreenButtonText => _isFullscreen ? "Vollbild verlassen" : "Vollbild";
     public Geometry FullscreenIconGeometry => Geometry.Parse(_isFullscreen
         ? "M9,3 V9 H3 M15,3 V9 H21 M21,15 H15 V21 M9,21 V15 H3"
@@ -99,6 +106,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 Raise(nameof(FullscreenButtonText));
                 Raise(nameof(FullscreenIconGeometry));
+                Raise(nameof(ContentMargin));
+                Raise(nameof(PreviewMargin));
+                Raise(nameof(SettingsPanelPadding));
+                Raise(nameof(BottomActionsMargin));
             }
         }
     }

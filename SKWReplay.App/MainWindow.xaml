@@ -66,13 +66,13 @@
             </Grid>
         </Border>
 
-        <Grid Grid.Row="1" Margin="18">
+        <Grid x:Name="MainContent" Grid.Row="1" Margin="18">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Margin="{Binding PreviewMargin}" Background="#0C0F13" BorderBrush="#303743"
+        <Border Grid.Column="0" Margin="{Binding PreviewMargin}" Background="#E2232932" BorderBrush="#3A424E"
                 BorderThickness="1" CornerRadius="16" ClipToBounds="True" MouseWheel="Preview_MouseWheel">
             <Grid>
                 <Image x:Name="PreviewImage" Source="{Binding Preview}" Stretch="Uniform"/>
@@ -114,8 +114,10 @@
             </Grid>
         </Border>
 
-        <Border Grid.Column="1" Width="330" Background="#E2232932" BorderBrush="#3A424E" BorderThickness="1"
-                CornerRadius="16" Padding="20" Visibility="{Binding SettingsPanelVisibility}">
+        <Border Grid.Column="1" Width="330" Background="#E2232932"
+                BorderBrush="#3A424E" BorderThickness="1"
+                CornerRadius="16" Padding="{Binding SettingsPanelPadding}"
+                Visibility="{Binding SettingsPanelVisibility}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -172,7 +174,7 @@
                     </StackPanel>
                 </Border>
 
-                <StackPanel Grid.Row="5" Margin="0,0,0,16" VerticalAlignment="Bottom">
+                <StackPanel Grid.Row="5" Margin="{Binding BottomActionsMargin}" VerticalAlignment="Bottom">
                     <Button Height="52" Margin="0,0,0,9" Command="{Binding StartCommand}"
                             Visibility="{Binding StartVisibility}"
                             Background="{StaticResource Accent}" BorderBrush="{StaticResource Accent}">

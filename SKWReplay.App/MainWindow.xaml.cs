@@ -3,6 +3,7 @@ using System.Windows.Automation;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shell;
 using Forms = System.Windows.Forms;
 
 namespace SKWReplay.App;
@@ -11,6 +12,7 @@ public partial class MainWindow : Window
 {
     private readonly MainViewModel _viewModel = new();
     private readonly List<PresentationWindow> _presentationWindows = new();
+    private WindowChrome? _windowChrome;
     private WindowStyle _windowedStyle;
     private WindowState _windowedState;
     private ResizeMode _windowedResizeMode;
@@ -22,6 +24,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        _windowChrome = WindowChrome.GetWindowChrome(this);
         DataContext = _viewModel;
         _viewModel.PropertyChanged += ViewModel_PropertyChanged;
         Closed += (_, _) =>
@@ -56,6 +59,7 @@ public partial class MainWindow : Window
     private void Window_StateChanged(object? sender, EventArgs e)
     {
         bool isMaximized = WindowState == WindowState.Maximized;
+        UpdateContentMargin();
         MaximizeButton.ToolTip = isMaximized ? "Wiederherstellen" : "Maximieren";
         AutomationProperties.SetName(MaximizeButton, isMaximized ? "Wiederherstellen" : "Maximieren");
         MaximizeGlyph.Data = Geometry.Parse(isMaximized
@@ -82,6 +86,24 @@ public partial class MainWindow : Window
             EnterFullscreen();
         else
             ExitFullscreen();
+        UpdateContentMargin();
+    }
+
+    private void UpdateContentMargin()
+    {
+        if (_viewModel.IsFullscreen)
+        {
+            MainContent.Margin = new Thickness(10);
+        }
+        else if (WindowState == WindowState.Maximized)
+        {
+            double titleBarHeight = TitleBar.ActualHeight > 0 ? TitleBar.ActualHeight : TitleBar.Height;
+            MainContent.Margin = new Thickness(18, 18, 18, 18 + titleBarHeight);
+        }
+        else
+        {
+            MainContent.Margin = new Thickness(18);
+        }
     }
 
     private void EnterFullscreen()
@@ -101,6 +123,7 @@ public partial class MainWindow : Window
             WindowState = WindowState.Normal;
             WindowStyle = WindowStyle.None;
             ResizeMode = ResizeMode.NoResize;
+            WindowChrome.SetWindowChrome(this, null);
             Left = primary.Bounds.Left;
             Top = primary.Bounds.Top;
             WindowState = WindowState.Maximized;
@@ -121,6 +144,7 @@ public partial class MainWindow : Window
         WindowState = WindowState.Normal;
         WindowStyle = _windowedStyle;
         ResizeMode = _windowedResizeMode;
+        WindowChrome.SetWindowChrome(this, _windowChrome);
         Left = _windowedLeft;
         Top = _windowedTop;
         Width = _windowedWidth;
