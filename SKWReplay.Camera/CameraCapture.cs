@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace SKWReplay.Camera;
 
-public sealed record CameraFrame(Mat Image, DateTimeOffset Timestamp);
+public sealed record CameraFrame(Mat Image, DateTimeOffset Timestamp, Mat? SourceImage = null);
 
 public sealed class CameraCapture : IDisposable
 {
@@ -61,23 +61,24 @@ public sealed class CameraCapture : IDisposable
 
             lock (_sync)
             {
-                Mat output = ApplyZoom(mat);
-                FrameReceived?.Invoke(new CameraFrame(output, DateTimeOffset.UtcNow));
+                Mat source = mat.Clone();
+                Mat output = ApplyZoom(mat, Zoom, PanX, PanY);
+                FrameReceived?.Invoke(new CameraFrame(output, DateTimeOffset.UtcNow, source));
             }
             Thread.Sleep(8);
         }
     }
 
-    private Mat ApplyZoom(Mat source)
+    public static Mat ApplyZoom(Mat source, double zoom, double panX = 0, double panY = 0)
     {
-        if (Zoom <= 1.01)
+        if (zoom <= 1.01)
             return source.Clone();
 
-        double zoom = Math.Clamp(Zoom, 1.0, 4.0);
+        zoom = Math.Clamp(zoom, 1.0, 4.0);
         int cropWidth = (int)(source.Width / zoom);
         int cropHeight = (int)(source.Height / zoom);
-        int centerX = source.Width / 2 + (int)(PanX * source.Width);
-        int centerY = source.Height / 2 + (int)(PanY * source.Height);
+        int centerX = source.Width / 2 + (int)(panX * source.Width);
+        int centerY = source.Height / 2 + (int)(panY * source.Height);
         int x = Math.Clamp(centerX - cropWidth / 2, 0, source.Width - cropWidth);
         int y = Math.Clamp(centerY - cropHeight / 2, 0, source.Height - cropHeight);
 

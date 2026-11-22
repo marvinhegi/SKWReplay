@@ -505,8 +505,6 @@ Entwickle die Anwendung schrittweise.
 
 # ToDo ab Hier
 
-Zoom anpassen mit verzögerung (evtl oben unten steichen)
-
 Das Disign anpassen Icon taskleiste oen in bar und als app
 
 Desktopverknüpfung
@@ -514,5 +512,3 @@ Desktopverknüpfung
 voreinstellungen zeit zoom
 
 deployment --> Sauber install wirklich als app
-
-Gitb es verschiednene sparachn? wenn jae ntfernen nur deutsch und Englisch

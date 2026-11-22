@@ -244,55 +244,64 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void OnCameraFrame(CameraFrame frame)
     {
-        WpfApplication.Current.Dispatcher.Invoke(() =>
+        try
         {
-            if (_state == RecordingState.Recording)
+            WpfApplication.Current.Dispatcher.Invoke(() =>
             {
-                if (!_recording.IsRecording)
-                {
-                    if (!_recording.StartSegment(frame.Image))
-                    {
-                        StatusMessage = _recording.LastError ?? "Encoding konnte nicht gestartet werden";
-                        _state = RecordingState.Error;
-                        RecordingBadgeVisibility = Visibility.Collapsed;
-                        RaiseStateCommands();
-                        frame.Image.Dispose();
-                        return;
-                    }
-                }
-                _recording.WriteFrame(frame.Image);
-            }
-
-            if (_state is RecordingState.Recording or RecordingState.Ready)
-            {
-                using var previewMat = new Mat();
-                Cv2.CvtColor(frame.Image, previewMat, ColorConversionCodes.BGR2BGRA);
-                int previewStride = checked((int)previewMat.Step());
-                Preview = BitmapSource.Create(
-                    previewMat.Width, previewMat.Height, 96, 96, PixelFormats.Bgra32, null,
-                    previewMat.Data, previewStride * previewMat.Rows, previewStride);
-
                 if (_state == RecordingState.Recording)
                 {
-                    byte[] jpeg = frame.Image.ToBytes(".jpg",
+                    if (!_recording.IsRecording)
+                    {
+                        if (!_recording.StartSegment(frame.Image))
+                        {
+                            StatusMessage = _recording.LastError ?? "Encoding konnte nicht gestartet werden";
+                            _state = RecordingState.Error;
+                            RecordingBadgeVisibility = Visibility.Collapsed;
+                            RaiseStateCommands();
+                            return;
+                        }
+                    }
+                    _recording.WriteFrame(frame.Image);
+
+                    Mat sourceImage = frame.SourceImage ?? frame.Image;
+                    byte[] jpeg = sourceImage.ToBytes(".jpg",
                         new ImageEncodingParam(ImwriteFlags.JpegQuality, 80));
                     _ring.Add(jpeg, frame.Timestamp);
                     var delayed = _ring.GetDelayedFrame(_delay);
-                    if (delayed is not null)
-                        Preview = LoadJpeg(delayed.Jpeg);
+                    if (delayed is null)
+                    {
+                        Preview = null;
+                    }
+                    else
+                    {
+                        using var delayedSource = Cv2.ImDecode(delayed.Jpeg, ImreadModes.Color);
+                        using var zoomedDelayed = CameraCapture.ApplyZoom(delayedSource, _zoom);
+                        Preview = CreatePreview(zoomedDelayed);
+                    }
                 }
-            }
+                else if (_state == RecordingState.Ready)
+                {
+                    Preview = CreatePreview(frame.Image);
+                }
+            });
+        }
+        finally
+        {
             frame.Image.Dispose();
-        });
+            frame.SourceImage?.Dispose();
+        }
     }
 
-    private BitmapSource LoadJpeg(byte[] jpeg)
+    private static BitmapSource CreatePreview(Mat image)
     {
-        using var stream = new MemoryStream(jpeg);
-        var decoder = new JpegBitmapDecoder(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
-        var frame = decoder.Frames[0];
-        frame.Freeze();
-        return frame;
+        using var previewMat = new Mat();
+        Cv2.CvtColor(image, previewMat, ColorConversionCodes.BGR2BGRA);
+        int previewStride = checked((int)previewMat.Step());
+        var bitmap = BitmapSource.Create(
+            previewMat.Width, previewMat.Height, 96, 96, PixelFormats.Bgra32, null,
+            previewMat.Data, previewStride * previewMat.Rows, previewStride);
+        bitmap.Freeze();
+        return bitmap;
     }
 
     private void UpdateTimer()
