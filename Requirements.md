@@ -509,6 +509,4 @@ Das Disign anpassen Icon taskleiste oen in bar und als app
 
 Desktopverknüpfung
 
-voreinstellungen zeit zoom
-
 deployment --> Sauber install wirklich als app

@@ -7,9 +7,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Assets\SKWReplay.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\SKWReplay.ico" />
+    <Resource Include="Assets\SKWReplay.png" />
     <ProjectReference Include="..\SKWReplay.Core\SKWReplay.Core.csproj" />
     <ProjectReference Include="..\SKWReplay.Camera\SKWReplay.Camera.csproj" />
     <ProjectReference Include="..\SKWReplay.Recording\SKWReplay.Recording.csproj" />

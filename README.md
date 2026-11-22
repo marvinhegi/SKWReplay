@@ -134,7 +134,7 @@ Die Aufnahme wird vorübergehend unter `%TEMP%\SKWReplay` abgelegt. Nach erfolgr
 
 | Projekt | Zweck |
 | --- | --- |
-| `SKWReplay.App` | WPF-Oberfläche, MVVM-ViewModel und App-Einstiegspunkt |
+| `SKWReplay.App` | WPF-Oberfläche, MVVM-ViewModel, App-Einstiegspunkt und Icon-Dateien unter `Assets` |
 | `SKWReplay.Core` | Gemeinsame Modelle, Status und UI-Hilfstypen |
 | `SKWReplay.Camera` | Kameraerkennung, Kamerazugriff und digitale Bildverarbeitung |
 | `SKWReplay.Recording` | Verzögerungspuffer, FFmpeg-Encoding und Export |
