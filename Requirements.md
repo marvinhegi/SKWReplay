@@ -499,13 +499,3 @@ Entwickle die Anwendung schrittweise.
 
 **Ergebnis:** Eine vollständig funktionsfähige, moderne Windows-Anwendung, mit der eine Kameraaufnahme mit einer frei einstellbaren Verzögerung von bis zu 60 Sekunden angezeigt und beliebig lange aufgenommen werden kann. Nach dem Beenden kann das gesamte Video als MP4 gespeichert werden.
 
-
-
-
-
-# ToDo ab Hier
-
-
-Desktopverknüpfung
-
-deployment --> Sauber install wirklich als app
