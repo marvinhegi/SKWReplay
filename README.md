@@ -22,24 +22,13 @@ SKWReplay ist eine Windows-Desktop-App für Kameraaufnahmen mit verzögerter Liv
 
 **Noch nicht enthalten:** Mikrofon-/Audioaufnahme, Touch-Gesten, Bildschirmaufnahme und eine garantierte Wiederherstellung nach Programm- oder Systemabbruch.
 
-## App von GitHub herunterladen und starten
+## Build, Deployment und Installation
 
-### Empfohlener Weg: fertiger Release
+Das Release-Paket ist eine self-contained Windows-x64-Veröffentlichung. Auf dem Zielcomputer werden weder das .NET SDK noch die .NET-Runtime oder andere Entwicklungswerkzeuge benötigt. Die Installation ist benutzerbezogen und benötigt keine Administratorrechte. Unterstützt werden Windows-10- und Windows-11-x64-Computer.
 
-1. Öffne die GitHub-Seite des SKWReplay-Repositories.
-2. Wähle **Releases** und öffne die neueste Version.
-3. Lade das Windows-x64-Archiv (üblicherweise `.zip`) herunter. Wenn dort kein fertiges Archiv angeboten wird, verwende stattdessen den Abschnitt [Aus dem Quellcode bauen](#aus-dem-quellcode-bauen).
-4. Entpacke **das ganze Archiv** in einen eigenen Ordner. Starte die App nicht direkt aus dem ZIP.
-5. Starte `SKWReplay.App.exe` im entpackten Ordner. Behalte auch die übrigen Dateien und Unterordner, insbesondere `ffmpeg\ffmpeg.exe`, im selben Ordner.
-6. Schliesse eine Kamera an und erlaube den Kamerazugriff, falls Windows danach fragt. Die Windows-Einstellungen dafür befinden sich unter **Einstellungen → Datenschutz und Sicherheit → Kamera** (in Windows 10: **Einstellungen → Datenschutz → Kamera**).
+### Aus dem Quellcode bauen
 
-Das veröffentlichte Archiv muss `SKWReplay.App.exe` und `ffmpeg\ffmpeg.exe` enthalten. Ohne FFmpeg kann die App kein Video encodieren oder exportieren. Falls Windows eine Sicherheitswarnung für eine heruntergeladene App anzeigt, führe die Datei nur aus, wenn du dem Herausgeber und der Quelle vertraust.
-
-> Es ist derzeit keine konkrete GitHub-Repository-Adresse in diesem Projekt hinterlegt. Verwende die Repository-Seite, von der du SKWReplay erhalten hast. Falls unter **Releases** noch kein App-Archiv bereitsteht, muss die Anwendung aus dem Quellcode gebaut werden.
-
-## Aus dem Quellcode bauen
-
-### Voraussetzungen
+#### Voraussetzungen
 
 - Windows x64
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
@@ -48,7 +37,7 @@ Das veröffentlichte Archiv muss `SKWReplay.App.exe` und `ffmpeg\ffmpeg.exe` ent
 
 Alternativ kann **Visual Studio 2022** mit der Workload **.NET-Desktopentwicklung** verwendet werden. WPF-Builds müssen auf Windows erstellt werden.
 
-### 1. Quellcode beziehen
+#### 1. Quellcode beziehen
 
 Auf der GitHub-Seite des Repositories kannst du über **Code → Download ZIP** den Quellcode herunterladen und entpacken. Für Git verwende im Repository unter **Code** die angezeigte Klon-URL:
 
@@ -59,7 +48,7 @@ cd SKWReplay
 
 `<Klon-URL-des-SKWReplay-Repositories>` ist durch die HTTPS- oder SSH-URL zu ersetzen, die GitHub für dieses Repository anzeigt.
 
-### 2. FFmpeg bereitstellen
+#### 2. FFmpeg bereitstellen
 
 Lade eine passende Windows-x64-Version von [ffmpeg.org](https://ffmpeg.org/download.html) herunter und entpacke sie. Lege die ausführbare Datei `ffmpeg.exe` im Projekt unter folgendem Pfad ab:
 
@@ -71,7 +60,7 @@ Der Ordner `ffmpeg` beziehungsweise die ausführbare Datei ist nicht Bestandteil
 
 Beachte die Lizenzbedingungen der verwendeten FFmpeg-Distribution und ihrer Codecs. Wenn du ein App-Archiv weitergibst, prüfe, ob die enthaltene FFmpeg-Version mit deiner Art der Weitergabe kompatibel ist und stelle gegebenenfalls die erforderlichen Lizenzinformationen bereit.
 
-### 3. Wiederherstellen, bauen und starten
+#### 3. Wiederherstellen, bauen und starten
 
 Führe die folgenden Befehle im Verzeichnis mit `SKWReplay.sln` aus:
 
@@ -83,7 +72,7 @@ dotnet run --project .\SKWReplay.App\SKWReplay.App.csproj
 
 NuGet-Pakete wie OpenCvSharp werden beim Wiederherstellen automatisch geladen. Für die Kameraerkennung und die Live-Vorschau muss eine Kamera angeschlossen und der Windows-Kamerazugriff freigegeben sein.
 
-### Tests ausführen
+#### Tests ausführen
 
 ```powershell
 dotnet test .\SKWReplay.sln
@@ -91,23 +80,44 @@ dotnet test .\SKWReplay.sln
 
 Die vorhandenen Tests prüfen grundlegende Fälle des Verzögerungspuffers. Sie ersetzen keine Tests mit realen Kameras, langen Aufnahmen oder verschiedenen Windows-Versionen.
 
-### Self-contained Windows-x64-Version veröffentlichen
+#### 4. Installationspaket erstellen
+
+Stelle sicher, dass `SKWReplay.App\ffmpeg\ffmpeg.exe` wie oben beschrieben vorhanden ist. Führe dann im Repository-Ordner in PowerShell aus:
 
 ```powershell
-dotnet publish .\SKWReplay.App\SKWReplay.App.csproj `
-  -c Release `
-  -r win-x64 `
-  --self-contained true `
-  -o .\publish-win-x64
+.\Build-Release.ps1
 ```
 
-Die veröffentlichte App liegt danach in `publish-win-x64`. Prüfe vor dem Weitergeben, dass diese Datei existiert:
+Das Skript veröffentlicht die App mit Release-Einstellungen für `win-x64` und kopiert die Installationsdateien in `publish-win-x64`. Bei einer PowerShell-Meldung zur Ausführungsrichtlinie kann das Skript für diesen Aufruf so gestartet werden:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Build-Release.ps1
+```
+
+#### 5. Deployment und Verteilung
+
+Das vollständige, weiterzugebende Paket ist der Ordner `publish-win-x64` mit **seinem gesamten Inhalt**. Darin befinden sich die App, ihre .NET- und nativen Abhängigkeiten, `ffmpeg\ffmpeg.exe` sowie `Install-SKWReplay.cmd` und `Install-SKWReplay.ps1`. Nicht nur die EXE-Datei weitergeben. Der Ordner kann direkt kopiert oder als ZIP-Archiv gepackt werden.
+
+Vor der Verteilung prüfen, dass mindestens diese Dateien enthalten sind:
 
 ```text
+publish-win-x64\SKWReplay.App.exe
 publish-win-x64\ffmpeg\ffmpeg.exe
+publish-win-x64\Install-SKWReplay.cmd
+publish-win-x64\Install-SKWReplay.ps1
 ```
 
-Wenn sie fehlt, wurde FFmpeg nicht in das App-Projektverzeichnis gelegt. Ergänze es unter `SKWReplay.App\ffmpeg\ffmpeg.exe` und veröffentliche erneut. Gib den **gesamten** Inhalt des Publish-Verzeichnisses weiter, nicht nur `SKWReplay.App.exe`. Das Zielsystem braucht das .NET 10 Runtime-Paket nicht separat; FFmpeg und die nativen App-Abhängigkeiten müssen jedoch mitgeliefert werden.
+FFmpeg wird mitgeliefert; beachte die Lizenzbedingungen der verwendeten FFmpeg-Distribution und ihrer Codecs. Stelle gegebenenfalls die erforderlichen Lizenzinformationen mit dem Paket bereit.
+
+#### 6. Auf einem anderen Windows-Computer installieren
+
+1. Den vollständigen `publish-win-x64`-Ordner (oder das ZIP-Archiv) auf den Windows-10- oder Windows-11-x64-Computer kopieren.
+2. Falls ein ZIP verwendet wird: den Ordner zuerst vollständig entpacken. Die Installation nicht direkt aus dem ZIP starten.
+3. `Install-SKWReplay.cmd` doppelklicken und die angezeigte Bestätigung abwarten. Bei einer Sicherheitsabfrage nur fortfahren, wenn Paketquelle und Herausgeber vertrauenswürdig sind.
+4. SKWReplay ist danach im Startmenü und über die Windows-Suche verfügbar; zusätzlich wird eine Desktop-Verknüpfung angelegt. Über beide Verknüpfungen wird die installierte App gestartet.
+5. Den Paketordner kann man nach erfolgreicher Installation löschen. Die Installation liegt unter `%LOCALAPPDATA%\Programs\SKWReplay`.
+
+Der Installer kopiert die Dateien in das Benutzerprofil und benötigt weder Administratorrechte noch manuelle Konfiguration oder zusätzliche Installationen. Zum Entfernen der App die Desktop- und Startmenü-Verknüpfungen löschen und den Ordner `%LOCALAPPDATA%\Programs\SKWReplay` entfernen. App-Einstellungen bleiben unabhängig davon unter `%LOCALAPPDATA%\SKWReplay`.
 
 ## Bedienung
 
