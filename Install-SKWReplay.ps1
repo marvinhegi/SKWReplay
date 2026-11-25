@@ -7,6 +7,7 @@ $sourceExecutable = Join-Path $PSScriptRoot 'SKWReplay.App.exe'
 $sourceFfmpeg = Join-Path $PSScriptRoot 'ffmpeg\ffmpeg.exe'
 $startMenuPath = Join-Path ([Environment]::GetFolderPath('Programs')) "$applicationName.lnk"
 $desktopPath = Join-Path ([Environment]::GetFolderPath('Desktop')) "$applicationName.lnk"
+$uninstallKeyPath = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\SKWReplay'
 
 if (-not (Test-Path -LiteralPath $sourceExecutable -PathType Leaf)) {
     throw "SKWReplay.App.exe fehlt im Paketordner: $PSScriptRoot"
@@ -54,6 +55,26 @@ try {
         [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell)
     }
 }
+
+    $powershellPath = Join-Path $PSHOME 'powershell.exe'
+    $uninstallerPath = Join-Path $applicationPath 'Uninstall-SKWReplay.ps1'
+    $uninstallString = '"{0}" -NoProfile -ExecutionPolicy Bypass -File "{1}"' -f $powershellPath, $uninstallerPath
+    $uninstallKey = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($uninstallKeyPath)
+    if ($null -eq $uninstallKey) {
+        throw 'Der Deinstallationseintrag konnte nicht erstellt werden.'
+    }
+    try {
+        $uninstallKey.SetValue('DisplayName', $applicationName, [Microsoft.Win32.RegistryValueKind]::String)
+        $uninstallKey.SetValue('Publisher', $applicationName, [Microsoft.Win32.RegistryValueKind]::String)
+        $uninstallKey.SetValue('InstallLocation', $applicationPath, [Microsoft.Win32.RegistryValueKind]::String)
+        $uninstallKey.SetValue('DisplayIcon', "$executablePath,0", [Microsoft.Win32.RegistryValueKind]::String)
+        $uninstallKey.SetValue('UninstallString', $uninstallString, [Microsoft.Win32.RegistryValueKind]::String)
+        $uninstallKey.SetValue('InstallDate', (Get-Date -Format 'yyyyMMdd'), [Microsoft.Win32.RegistryValueKind]::String)
+        $uninstallKey.SetValue('NoModify', 1, [Microsoft.Win32.RegistryValueKind]::DWord)
+        $uninstallKey.SetValue('NoRepair', 1, [Microsoft.Win32.RegistryValueKind]::DWord)
+    } finally {
+        $uninstallKey.Dispose()
+    }
 
 Write-Host "SKWReplay wurde installiert nach: $applicationPath"
 Write-Host 'Die App ist jetzt im Startmenue und auf dem Desktop verfuegbar.'

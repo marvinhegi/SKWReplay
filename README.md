@@ -103,6 +103,7 @@ Vor der Verteilung prüfen, dass mindestens diese Dateien enthalten sind:
 ```text
 SKWReplay-publish-win-x64\Install-SKWReplay.cmd
 SKWReplay-publish-win-x64\SKWReplay\Install-SKWReplay.ps1
+SKWReplay-publish-win-x64\SKWReplay\Uninstall-SKWReplay.ps1
 SKWReplay-publish-win-x64\SKWReplay\SKWReplay.App.exe
 SKWReplay-publish-win-x64\SKWReplay\ffmpeg\ffmpeg.exe
 ```
@@ -117,7 +118,7 @@ FFmpeg wird mitgeliefert; beachte die Lizenzbedingungen der verwendeten FFmpeg-D
 4. SKWReplay ist danach im Startmenü und über die Windows-Suche verfügbar; zusätzlich wird eine Desktop-Verknüpfung angelegt. Über beide Verknüpfungen wird die installierte App gestartet.
 5. Den Paketordner kann man nach erfolgreicher Installation löschen. Die Installation liegt unter `%LOCALAPPDATA%\Programs\SKWReplay`.
 
-Der Installer kopiert die Dateien in das Benutzerprofil und benötigt weder Administratorrechte noch manuelle Konfiguration oder zusätzliche Installationen. Zum Entfernen der App die Desktop- und Startmenü-Verknüpfungen löschen und den Ordner `%LOCALAPPDATA%\Programs\SKWReplay` entfernen. App-Einstellungen bleiben unabhängig davon unter `%LOCALAPPDATA%\SKWReplay`.
+Der Installer kopiert die Dateien in das Benutzerprofil und benötigt weder Administratorrechte noch manuelle Konfiguration oder zusätzliche Installationen. Er registriert SKWReplay ausserdem unter **Einstellungen → Apps → Installierte Apps** (Windows 11) beziehungsweise **Apps & Features** (Windows 10). Dort kann die App wie andere installierte Programme deinstalliert werden. Dabei werden Anwendung und Verknüpfungen entfernt; App-Einstellungen unter `%LOCALAPPDATA%\SKWReplay` bleiben erhalten.
 
 ## Bedienung
 

@@ -35,6 +35,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Install-SKWReplay.ps1') -Destination $publishPath -Force
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Uninstall-SKWReplay.ps1') -Destination $publishPath -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'Install-SKWReplay.cmd') -Destination $packagePath -Force
 
 if (-not (Test-Path -LiteralPath (Join-Path $publishPath 'ffmpeg\ffmpeg.exe') -PathType Leaf)) {
