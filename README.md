@@ -88,7 +88,7 @@ Stelle sicher, dass `SKWReplay.App\ffmpeg\ffmpeg.exe` wie oben beschrieben vorha
 .\Build-Release.ps1
 ```
 
-Das Skript veröffentlicht die App mit Release-Einstellungen für `win-x64` und kopiert die Installationsdateien in `publish-win-x64`. Bei einer PowerShell-Meldung zur Ausführungsrichtlinie kann das Skript für diesen Aufruf so gestartet werden:
+Das Skript veröffentlicht die App mit Release-Einstellungen für `win-x64` und erstellt `SKWReplay-publish-win-x64`. Auf der obersten Ebene liegt nur `Install-SKWReplay.cmd`; die App-Dateien und der von der CMD-Datei gestartete PowerShell-Installer liegen gemeinsam im Unterordner `SKWReplay`. Vorhandene Publish-Dateien im Ordner werden beim erneuten Build in diesen Unterordner verschoben. Bei einer PowerShell-Meldung zur Ausführungsrichtlinie kann das Build-Skript für diesen Aufruf so gestartet werden:
 
 ```powershell
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Build-Release.ps1
@@ -96,22 +96,22 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Build-Release.ps1
 
 #### 5. Deployment und Verteilung
 
-Das vollständige, weiterzugebende Paket ist der Ordner `publish-win-x64` mit **seinem gesamten Inhalt**. Darin befinden sich die App, ihre .NET- und nativen Abhängigkeiten, `ffmpeg\ffmpeg.exe` sowie `Install-SKWReplay.cmd` und `Install-SKWReplay.ps1`. Nicht nur die EXE-Datei weitergeben. Der Ordner kann direkt kopiert oder als ZIP-Archiv gepackt werden.
+Das vollständige, weiterzugebende Paket ist der Ordner `SKWReplay-publish-win-x64` mit **seinem gesamten Inhalt**. Auf der obersten Ebene befindet sich nur `Install-SKWReplay.cmd`; der Unterordner `SKWReplay` enthält die App, ihre .NET- und nativen Abhängigkeiten, `ffmpeg\ffmpeg.exe` sowie den PowerShell-Installer. Nicht nur die CMD-Datei oder die EXE-Datei weitergeben. Den Ordner unverändert kopieren oder als ZIP-Archiv packen.
 
 Vor der Verteilung prüfen, dass mindestens diese Dateien enthalten sind:
 
 ```text
-publish-win-x64\SKWReplay.App.exe
-publish-win-x64\ffmpeg\ffmpeg.exe
-publish-win-x64\Install-SKWReplay.cmd
-publish-win-x64\Install-SKWReplay.ps1
+SKWReplay-publish-win-x64\Install-SKWReplay.cmd
+SKWReplay-publish-win-x64\SKWReplay\Install-SKWReplay.ps1
+SKWReplay-publish-win-x64\SKWReplay\SKWReplay.App.exe
+SKWReplay-publish-win-x64\SKWReplay\ffmpeg\ffmpeg.exe
 ```
 
 FFmpeg wird mitgeliefert; beachte die Lizenzbedingungen der verwendeten FFmpeg-Distribution und ihrer Codecs. Stelle gegebenenfalls die erforderlichen Lizenzinformationen mit dem Paket bereit.
 
 #### 6. Auf einem anderen Windows-Computer installieren
 
-1. Den vollständigen `publish-win-x64`-Ordner (oder das ZIP-Archiv) auf den Windows-10- oder Windows-11-x64-Computer kopieren.
+1. Den vollständigen `SKWReplay-publish-win-x64`-Ordner (oder das ZIP-Archiv) auf den Windows-10- oder Windows-11-x64-Computer kopieren. Der Unterordner `SKWReplay` muss neben `Install-SKWReplay.cmd` erhalten bleiben.
 2. Falls ein ZIP verwendet wird: den Ordner zuerst vollständig entpacken. Die Installation nicht direkt aus dem ZIP starten.
 3. `Install-SKWReplay.cmd` doppelklicken und die angezeigte Bestätigung abwarten. Bei einer Sicherheitsabfrage nur fortfahren, wenn Paketquelle und Herausgeber vertrauenswürdig sind.
 4. SKWReplay ist danach im Startmenü und über die Windows-Suche verfügbar; zusätzlich wird eine Desktop-Verknüpfung angelegt. Über beide Verknüpfungen wird die installierte App gestartet.

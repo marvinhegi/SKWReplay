@@ -23,6 +23,8 @@ Thumbs.db
 **/obj/
 publish-win-x64/
 **/publish-win-x64/
+SKWReplay-publish-win-x64/
+**/SKWReplay-publish-win-x64/
 
 # FFmpeg
 **/ffmpeg/
